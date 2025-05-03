@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadpad Export</title>
+
+<style>
+    @import url('https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css');
+@import url("https://rsms.me/inter/inter.css");
+@import url("https://legacy.klash.dev/legacy.css");
+html, body {
+    height: 100vh;
+    width: 100vw;
+    color: white;
+    padding: 0;
+    margin: 0;
+    vertical-align: baseline;
+    font-family: Inter;
+}
+body {
+    background-image: var(--bg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50% 50%;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-direction: column;
+}
+h1 {
+    margin: 0;
+    font-size: 50px;
+    text-shadow: -1px 1px 5px black;
+}
+.sub {
+    font-size: 30px;
+}
+.klash {
+    font-family: KlashLegacy;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    height: 35px;
+    border-radius: 8px;
+    gap: 4px;
+}
+#input {
+    width: 100%;
+    flex-shrink: 0;
+    height: 100%;
+    border-radius: 8px;
+    border: 2px solid #955ce7;
+    background: #262a2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: Inter;
+    color: white;
+}
+#input:focus-within {
+    outline: none;
+}
+#search {
+    width: 37px;
+    flex-shrink: 0;
+    height: 37px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #955ce7;
+    background: #402757;
+    color: #955ce7;
+}
+#browser {
+    font-weight: 500;
+}
+#browser-full.chrome #browser, #browser-full.chrome #browser-name {
+    color: rgb(151, 255, 130);
+}
+#browser-full.firefox-browser #browser, #browser-full.firefox-browser #browser-name {
+    color: rgb(255, 176, 130);
+}
+#browser-full.safari #browser, #browser-full.safari #browser-name {
+    color: rgb(130, 143, 255);
+}
+#browser-full {
+    text-shadow: 0px 0px 4px black; 
+}
+</style>
+</head>
+<body>
+<h1>Boba <span class="sub">by</span> <span class="klash">KLASH</span></h1>
+<div class="search">
+    <input type="text" id="input" placeholder="Search anything" />
+    <button id="search"><i class="fa-solid fa-magnifying-glass"></i></button>
+</div>
+<span id="browser-full" class="none">You're using <i id="browser" class="fa-solid fa-circle-k"></i> <span id="browser-name">Boba by Klash</span></span>
+<script type="text/javascript">
+    var bg1 = Math.floor(Math.random() * 21) + 47;
+var bg2 = Math.floor(Math.random() * 13) + 7;
+var bgx = Math.floor(Math.random() * 2) + 1 == 1 ? bg1 : bg2;
+var bg = bgx < 10 ? `0${bgx}` : bgx;
+var backgroundUrl = `url(https://manganum.fra1.cdn.digitaloceanspaces.com/collections/nature/100${bg}-fhd.jpg)`
+document.documentElement.style.setProperty('--bg', backgroundUrl);
+
+function search() {
+    var value = document.querySelector('#input').value;
+    window.location.href = "https://duckduckgo.com/search?q="+encodeURIComponent(value);
+}
+
+document.querySelector('#input').addEventListener('keydown', (e) => {
+    if(e.key.includes("Enter")) search();
+})
+document.querySelector('#search').addEventListener('click', search);
+
+function sb(to) {
+    document.querySelector('#browser-full').className = to;
+    document.querySelector('#browser').className = `fas fab fa-${to}`;
+    document.querySelector('#browser-name').textContent = `${to[0].toUpperCase()}${to.substr(1).replace('-browser','')}`;
+}
+
+const ua = navigator.userAgent;
+if (/Chrome/.test(ua) && !/Edge|Edg|OPR/.test(ua)) sb('chrome');
+else if (/Firefox/.test(ua)) sb('firefox-browser');
+else if (/Safari/.test(ua) && !/Chrome/.test(ua)) sb('safari');
+</script>
+    
+</body>
+</html>
+                

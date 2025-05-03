@@ -1,0 +1,21 @@
+{
+  "name": "boba",
+  "version": "1.0.0",
+  "description": "A modular Node.js server for streaming lightweight browsers to clients",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "start:playwright": "node server.js --browser=playwright"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsdom": "^21.1.1",
+    "playwright": "^1.40.0",
+    "socket.io": "^4.7.2",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

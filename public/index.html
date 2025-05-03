@@ -1,0 +1,434 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boba Browser</title>
+    <style>
+        @import url("https://rsms.me/inter/inter.css");
+        @import url("https://legacy.klash.dev/legacy.css");
+        @import url('https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css');
+
+        body {
+            font-family: Inter, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+            color: #6c5ce7;
+        }
+
+        .logo span {
+            color: #fd79a8;
+        }
+
+        .browser-options {
+            margin-left: auto;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .control-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        #url {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 10px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-family: Inter;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        #start-btn {
+            background-color: rgb(255, 123, 0);
+        }
+
+        button:hover {
+            background-color: #5b4bd4;
+        }
+
+        #browser-type {
+            padding: 8px;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+        }
+
+        .browser-container {
+            border: 1px solid #e1e4e8;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #browser-screen {
+            width: 100%;
+            height: 600px;
+            background-color: white;
+            cursor: default;
+        }
+
+        input {
+            font-family: Inter;
+        }
+
+        select {
+            font-family: Inter;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .status {
+            padding: 10px;
+            color: #666;
+            font-size: 14px;
+            flex-grow: 1;
+        }
+
+        .performance {
+            color: #666;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 600px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .klash {
+            font-family: KlashLegacy;
+            font-weight: 500;
+            font-size: 28px;
+            color: rgb(255, 123, 0) !important;
+        }
+
+        .spinner-outer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 36px;
+            width: 56px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.31);
+            animation: spin 1s linear infinite;
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50%;
+            margin: 0 10px;
+            border-left-color: #6c5ce7;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #click-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        @media only screen and (max-width: 700px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .controls button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .loading {
+                padding: 20px;
+                box-sizing: border-box;
+            }
+
+            .browser-container {
+                aspect-ratio: 16/9;
+                height: auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            #browser-screen {
+                width: 100%;
+                height: 100%;
+            }
+        }
+        #browser-icon {
+            font-weight: 400 !important;
+        }
+        button i {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Boba<span> by </span><span class="klash">KLASH</span></div>
+            <div class="browser-options">
+                <select id="browser-type">
+                    <option value="playwright">Playwright (Firefox)</option>
+                    <option value="webkit">Playwright (Safari)</option>
+                    <option value="chromium">Playwright (Chromium)</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="controls">
+            <input type="text" id="url" placeholder="Enter URL" value="https://boba.klash.dev/search">
+            <button id="start-btn"><span>Start</span> <i id="browser-icon" class="fa-solid fab fa-firefox-browser"></i></button>
+            <div class="control-group">
+                <button id="go-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <button id="refresh-btn"><i class="fa-solid fa-rotate"></i></button>
+            </div>
+        </div>
+
+        <div class="browser-container">
+            <div id="click-area"></div>
+            <div id="browser-screen">
+                <div class="loading">
+                    <div class="spinner-outer">
+                        <div class="spinner"></div>
+                    </div>
+                    <span>Ready to start browser session</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div id="status" class="status">Select a browser type and click 'Start Browser'.</div>
+            <div id="performance" class="performance">Render time: --</div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Connect to Socket.IO server
+        const socket = io();
+
+        // DOM elements
+        const startBtn = document.getElementById('start-btn');
+        const goBtn = document.getElementById('go-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const urlInput = document.getElementById('url');
+        const browserTypeSelect = document.getElementById('browser-type');
+        const browserScreen = document.getElementById('browser-screen');
+        const clickArea = document.getElementById('click-area');
+        const statusEl = document.getElementById('status');
+        const performanceEl = document.getElementById('performance');
+
+        // Variables
+        let browserStarted = false;
+        let renderStartTime = 0;
+
+        // Event listeners
+        startBtn.addEventListener('click', startBrowser);
+        goBtn.addEventListener('click', navigateToUrl);
+        refreshBtn.addEventListener('click', refreshPage);
+        clickArea.addEventListener('click', handleScreenClick);
+        document.addEventListener('keydown', handleKeyDown);
+        browserTypeSelect.addEventListener('change', () => {
+            const selectedBrowser = browserTypeSelect.value;
+            const icon = document.getElementById('browser-icon');
+            if (selectedBrowser === 'webkit') {
+                icon.className = 'fa-solid fab fa-safari';
+            } else if (selectedBrowser === 'chromium') {
+                icon.className = 'fa-solid fab fa-chrome';
+            } else {
+                icon.className = 'fa-solid fab fa-firefox-browser';
+            }
+        });
+
+        // Socket event listeners
+        socket.on('screenshot', data => {
+            const endTime = performance.now();
+            const renderTime = endTime - renderStartTime;
+
+            browserScreen.innerHTML = `<img src="data:image/jpeg;base64,${data.image}" width="100%">`;
+            performanceEl.textContent = `Render time: ${renderTime.toFixed(0)}ms`;
+            renderStartTime = performance.now();
+        });
+
+        socket.on('browser-started', data => {
+            browserStarted = true;
+            statusEl.textContent = `Browser session started successfully using ${data.browserType}.`;
+            startBtn.querySelector('span').textContent = 'Restart';
+        });
+
+        socket.on('browser-error', data => {
+            if(data.includes('No active browser')) {
+                browserStarted = false;
+                statusEl.innerHTML = `<span class="error">Browser session closed, please restart</span>`;
+                startBtn.querySelector('span').textContent = 'Start';
+                var loading = `<div class="loading">
+                    <div class="spinner-outer">
+                        <div class="spinner"></div>
+                    </div>
+                    <span>Ready to start browser session</span>
+                </div>`;
+                browserScreen.innerHTML = loading;
+            } else {
+                statusEl.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+            }
+        });
+
+        // Functions
+        function startBrowser() {
+            browserStarted = false;
+            statusEl.textContent = 'Starting browser...';
+            browserScreen.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Loading browser...</span>
+        </div>
+      `;
+
+            renderStartTime = performance.now();
+            const screenElement = document.getElementById('browser-screen');
+            const viewportWidth = screenElement.clientWidth;
+            const viewportHeight = screenElement.clientHeight;
+
+            socket.emit('start-browser', {
+                url: urlInput.value,
+                browserType: browserTypeSelect.value,
+                viewportWidth: viewportWidth,
+                viewportHeight: viewportHeight,
+                fps: 30
+            });
+        }
+
+        function navigateToUrl() {
+            if (!browserStarted) {
+                startBrowser();
+                return;
+            }
+
+            statusEl.textContent = `Navigating to ${urlInput.value}...`;
+            renderStartTime = performance.now();
+
+            socket.emit('navigate', {
+                url: urlInput.value
+            });
+        }
+
+        function refreshPage() {
+            if (!browserStarted) {
+                startBrowser();
+                return;
+            }
+
+            statusEl.textContent = 'Refreshing page...';
+            renderStartTime = performance.now();
+            socket.emit('navigate', {
+                url: urlInput.value
+            });
+        }
+
+        function handleScreenClick(event) {
+            if (!browserStarted) return;
+
+            console.log('Clicked');
+
+            const img = browserScreen.querySelector('img');
+            if (!img) return console.log('No image found');
+
+            const rect = img.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            renderStartTime = performance.now();
+            socket.emit('click', { 
+                x: x,
+                y: y
+            });
+            
+            statusEl.textContent = `Clicked at (${Math.round(x)}, ${Math.round(y)})`;
+        }
+
+        function handleKeyDown(event) {
+            if (!browserStarted) return;
+            if (document.activeElement === urlInput) return;
+
+            renderStartTime = performance.now();
+            socket.emit('type', { text: event.key });
+            statusEl.textContent = `Typed: ${event.key}`;
+        }
+    </script>
+</body>
+
+</html>
