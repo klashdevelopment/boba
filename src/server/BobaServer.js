@@ -1,6 +1,3 @@
-/**
- * BobaServer - Express server for browser streaming
- */
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -8,10 +5,6 @@ const path = require('path');
 const SessionManager = require('./SessionManager');
 
 class BobaServer {
-    /**
-     * Create a new BobaServer instance
-     * @param {Object} options - Server configuration options
-     */
     constructor(options = {}) {
         this.options = {
             port: options.port || process.env.PORT || 3000,
@@ -20,38 +13,23 @@ class BobaServer {
             defaultFps: options.defaultFps || 5
         };
 
-        // Initialize Express and HTTP server
         this.app = express();
         this.server = http.createServer(this.app);
         this.io = new Server(this.server);
-
-        // Initialize session manager
         this.sessionManager = new SessionManager();
-
-        // Store screenshot intervals for each session
         this.screenshotIntervals = new Map();
 
-        // Configure routes and middleware
         this._configureApp();
-
-        // Configure Socket.IO handlers
         this._configureSocketHandlers();
     }
 
-    /**
-     * Configure Express app middleware and routes
-     * @private
-     */
     _configureApp() {
-        // Serve static files
         this.app.use(express.static(this.options.publicDir));
 
-        // Serve main page
         this.app.get('/', (req, res) => {
             res.sendFile(path.join(this.options.publicDir, 'index.html'));
         });
 
-        // API endpoints
         this.app.get('/api/status', (req, res) => {
             res.json({
                 status: 'ok',
@@ -62,15 +40,10 @@ class BobaServer {
         });
     }
 
-    /**
-     * Configure Socket.IO event handlers
-     * @private
-     */
     _configureSocketHandlers() {
         this.io.on('connection', (socket) => {
             console.log('Client connected:', socket.id);
 
-            // Create a new browser session
             socket.on('start-browser', async (options = {}) => {
                 try {
                     const browserType = options.browserType || this.options.defaultBrowserType;
@@ -92,8 +65,6 @@ class BobaServer {
                             browserType,
                             fps
                         });
-
-                        // Start interval screenshot sending
                         this._startScreenshotInterval(socket.id);
                     } else {
                         socket.emit('browser-error', { error: result.error });
@@ -104,7 +75,6 @@ class BobaServer {
                 }
             });
 
-            // Update screenshot FPS
             socket.on('set-fps', (data) => {
                 try {
                     const fps = parseInt(data.fps, 5) || this.options.defaultFps;
@@ -115,10 +85,7 @@ class BobaServer {
                         return;
                     }
                     
-                    // Update FPS in session
                     this.sessionManager.updateSession(socket.id, { fps });
-                    
-                    // Restart interval with new FPS
                     this._stopScreenshotInterval(socket.id);
                     this._startScreenshotInterval(socket.id);
                     
@@ -130,7 +97,6 @@ class BobaServer {
                 }
             });
 
-            // Navigate to URL
             socket.on('navigate', async (data) => {
                 try {
                     const browser = this.sessionManager.getSession(socket.id);
@@ -140,14 +106,12 @@ class BobaServer {
                     }
 
                     await browser.navigate(data.url);
-                    // Screenshot will be sent by the interval
                 } catch (error) {
                     console.error('Navigation error:', error);
                     socket.emit('browser-error', { error: error.message });
                 }
             });
 
-            // Handle mouse clicks
             socket.on('click', async (data) => {
                 try {
                     const browser = this.sessionManager.getSession(socket.id);
@@ -156,13 +120,8 @@ class BobaServer {
                         return;
                     }
 
-                    // Temporarily pause screenshots during interaction
                     await this._pauseScreenshots(socket.id);
-                    
-                    // Perform the click
                     await browser.click(data.x, data.y);
-                    
-                    // Resume screenshots after click
                     this._resumeScreenshots(socket.id);
                 } catch (error) {
                     this._resumeScreenshots(socket.id);
@@ -171,7 +130,6 @@ class BobaServer {
                 }
             });
 
-            // Handle typing
             socket.on('type', async (data) => {
                 try {
                     const browser = this.sessionManager.getSession(socket.id);
@@ -180,13 +138,8 @@ class BobaServer {
                         return;
                     }
 
-                    // Temporarily pause screenshots during interaction
                     await this._pauseScreenshots(socket.id);
-                    
-                    // Perform the typing
                     await browser.type(data.text);
-                    
-                    // Resume screenshots after typing
                     this._resumeScreenshots(socket.id);
                 } catch (error) {
                     this._resumeScreenshots(socket.id);
@@ -195,7 +148,6 @@ class BobaServer {
                 }
             });
 
-            // Handle disconnection
             socket.on('disconnect', () => {
                 console.log('Client disconnected:', socket.id);
                 this._stopScreenshotInterval(socket.id);
@@ -204,11 +156,6 @@ class BobaServer {
         });
     }
 
-    /**
-     * Temporarily pause screenshots for a session
-     * @param {string} sessionId - Session ID
-     * @private
-     */
     async _pauseScreenshots(sessionId) {
         const intervalInfo = this.screenshotIntervals.get(sessionId);
         if (intervalInfo) {
@@ -216,11 +163,6 @@ class BobaServer {
         }
     }
 
-    /**
-     * Resume screenshots for a session
-     * @param {string} sessionId - Session ID
-     * @private
-     */
     _resumeScreenshots(sessionId) {
         const intervalInfo = this.screenshotIntervals.get(sessionId);
         if (intervalInfo) {
@@ -228,27 +170,18 @@ class BobaServer {
         }
     }
 
-    /**
-     * Start interval-based screenshot sending
-     * @param {string} sessionId - Session ID
-     * @private
-     */
     _startScreenshotInterval(sessionId) {
-        // Stop any existing interval
         this._stopScreenshotInterval(sessionId);
         
-        // Get the session info to determine FPS
         const sessionInfo = this.sessionManager.getSessionInfo(sessionId);
         if (!sessionInfo) {
             console.error(`Cannot start screenshot interval: Session ${sessionId} not found`);
             return;
         }
         
-        // Calculate interval in ms based on per-session FPS
         const fps = sessionInfo.fps || this.options.defaultFps;
         const intervalMs = Math.floor(1000 / fps);
         
-        // Create new interval with pause capability
         const intervalInfo = {
             paused: false,
             interval: setInterval(async () => {
@@ -265,11 +198,6 @@ class BobaServer {
         console.log(`Started screenshot interval for ${sessionId} at ${fps} FPS (${intervalMs}ms)`);
     }
 
-    /**
-     * Stop interval-based screenshot sending
-     * @param {string} sessionId - Session ID
-     * @private
-     */
     _stopScreenshotInterval(sessionId) {
         const intervalInfo = this.screenshotIntervals.get(sessionId);
         if (intervalInfo && intervalInfo.interval) {
@@ -279,11 +207,6 @@ class BobaServer {
         }
     }
 
-    /**
-     * Helper method to capture screenshot and send to client
-     * @param {Socket} socket - Socket.IO socket
-     * @private
-     */
     async _captureAndSendScreenshot(socket) {
         try {
             const browser = this.sessionManager.getSession(socket.id);
@@ -291,7 +214,6 @@ class BobaServer {
 
             const screenshot = await browser.screenshot();
 
-            // Check if screenshot was generated properly
             if (!screenshot) {
                 console.warn('Screenshot is undefined or null');
                 socket.emit('browser-error', { error: 'Failed to capture screenshot' });
@@ -305,10 +227,6 @@ class BobaServer {
         }
     }
 
-    /**
-     * Start the server
-     * @returns {Promise<void>}
-     */
     start() {
         return new Promise((resolve) => {
             this.server.listen(this.options.port, () => {
@@ -318,20 +236,13 @@ class BobaServer {
         });
     }
 
-    /**
-     * Stop the server and clean up resources
-     * @returns {Promise<void>}
-     */
     async stop() {
-        // Clear all screenshot intervals
         for (const sessionId of this.screenshotIntervals.keys()) {
             this._stopScreenshotInterval(sessionId);
         }
 
-        // Clean up all browser sessions
         await this.sessionManager.cleanupAllSessions();
 
-        // Close the server
         return new Promise((resolve, reject) => {
             this.server.close((err) => {
                 if (err) {

@@ -1,7 +1,3 @@
-/**
- * BobaBrowser - Abstract base class for browser implementations
- * Provides the interface that all browser implementations must follow
- */
 class BobaBrowser {
     /**
      * Initialize the browser

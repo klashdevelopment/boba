@@ -1,6 +1,3 @@
-/**
- * BobaPlaywright - Firefox browser implementation using Playwright
- */
 const playwright = require('playwright');
 const BobaBrowser = require('./BobaBrowser');
 
@@ -11,13 +8,13 @@ class BobaPlaywright extends BobaBrowser {
     */
   constructor(browserType = 'firefox') {
     super();
-    this.browserType = browserType; // Type of browser (firefox, chromium, etc.)
+    this.browserType = browserType;
     this.browser = null;
     this.context = null;
     this.page = null;
     this.lastInteraction = 0;
     this.isInteracting = false;
-    this.viewportSize = { width: 1280, height: 720 }; // Default viewport size
+    this.viewportSize = { width: 1280, height: 720 };
   }
   
   /**
@@ -27,7 +24,6 @@ class BobaPlaywright extends BobaBrowser {
    */
   async initialize(options = {}) {
     try {
-      // Using Firefox which is more lightweight than Chromium
       switch (this.browserType) {
         case 'firefox':
           this.browser = await playwright.firefox.launch({
@@ -47,8 +43,6 @@ class BobaPlaywright extends BobaBrowser {
         default:
           throw new Error(`Unsupported browser type: ${this.browserType}`);
       }
-      
-      // Set viewport size
       const viewportWidth = options.viewportWidth || 1280;
       const viewportHeight = options.viewportHeight || 720;
       this.viewportSize = { width: viewportWidth, height: viewportHeight };
@@ -58,9 +52,7 @@ class BobaPlaywright extends BobaBrowser {
       });
       
       this.page = await this.context.newPage();
-      
-      // Navigate to initial URL if provided
-      const url = options?.url || 'https://duckduckgo.com';
+      const url = options?.url || 'https://pages.klash.dev/search';
       await this.navigate(url);
       
       return { success: true };
@@ -99,13 +91,10 @@ class BobaPlaywright extends BobaBrowser {
    * @private 
    */
   async _waitForReady(minDelay = 100) {
-    // Wait for minimum time since last interaction
     const timeSinceLastInteraction = Date.now() - this.lastInteraction;
     if (timeSinceLastInteraction < minDelay) {
       await new Promise(resolve => setTimeout(resolve, minDelay - timeSinceLastInteraction));
     }
-    
-    // Wait for any pending interactions to complete
     while (this.isInteracting) {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
@@ -113,8 +102,8 @@ class BobaPlaywright extends BobaBrowser {
   
   /**
    * Click at a specific coordinate
-   * @param {number} x - X coordinate from client's perspective
-   * @param {number} y - Y coordinate from client's perspective
+   * @param {number} x - X coordinate from client
+   * @param {number} y - Y coordinate from client
    * @returns {Promise<void>}
    */
   async click(x, y) {
@@ -126,17 +115,14 @@ class BobaPlaywright extends BobaBrowser {
       await this._waitForReady();
       this.isInteracting = true;
       
-      // First ensure coords are valid numbers
+      // ensure not negative
       x = Math.max(0, parseInt(x) || 0);
       y = Math.max(0, parseInt(y) || 0);
       
       await this.page.mouse.click(x, y);
-      
-      // Update state
       this.lastInteraction = Date.now();
       this.isInteracting = false;
-      
-      // Allow page to respond before continuing
+
       await new Promise(resolve => setTimeout(resolve, 150));
     } catch (error) {
       this.isInteracting = false;
@@ -158,14 +144,10 @@ class BobaPlaywright extends BobaBrowser {
     try {
       await this._waitForReady();
       this.isInteracting = true;
-      
-      // THIS IS NOT A BUG! WE NEED TO USE PRESS to prevent "Hello worldEnterBackspace" etc
       await this.page.keyboard.press(text);
       
       this.lastInteraction = Date.now();
       this.isInteracting = false;
-      
-      // Brief pause after typing to allow page to respond
       await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {
       this.isInteracting = false;
@@ -184,7 +166,6 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      // Don't take screenshots during interactions
       await this._waitForReady(50);
       
       return await this.page.screenshot({ 

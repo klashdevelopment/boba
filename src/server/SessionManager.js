@@ -1,6 +1,3 @@
-/**
- * SessionManager - Manages browser sessions for connected clients
- */
 const BobaPlaywright = require('../browsers/BobaPlaywright');
 
 class SessionManager {
@@ -16,13 +13,10 @@ class SessionManager {
      * @returns {Promise<Object>} - Status of browser initialization
      */
     async createSession(sessionId, browserType = 'playwright', options = {}) {
-        // Close existing session if one exists
         await this.closeSession(sessionId);
 
         try {
             let browser;
-
-            // Create the appropriate browser instance
             switch (browserType.toLowerCase()) {
                 case 'playwright':
                     browser = new BobaPlaywright();
@@ -37,10 +31,8 @@ class SessionManager {
                     throw new Error(`Unknown browser type: ${browserType}`);
             }
 
-            // Initialize the browser
+            // init / start
             await browser.initialize(options);
-
-            // Store the session
             this.sessions[sessionId] = {
                 browser,
                 type: browserType,
