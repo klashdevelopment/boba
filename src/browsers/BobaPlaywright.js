@@ -252,7 +252,7 @@ class BobaPlaywright extends BobaBrowser {
       return await this.page.screenshot({ 
         type: 'jpeg', 
         quality: 100,
-        timeout: 50000
+        timeout: 100000
       });
     } catch (error) {
       console.error('Screenshot error:', error);

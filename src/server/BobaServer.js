@@ -294,6 +294,11 @@ class BobaServer {
             }
 
             if(screenshot === "Screenshot timeout (session has died)") {
+                // remove the session from the session manager
+                this.sessionManager.closeSession(socket.id).catch(console.error);
+                // stop the screenshot interval
+                this._stopScreenshotInterval(socket.id);
+                // emit an error to the client
                 socket.emit('browser-error', { error: 'Session has died', killSession: true });
                 return;
             }
