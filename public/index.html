@@ -563,7 +563,7 @@
             clearTimeout(mouseMoveTimeout);
             mouseMoveTimeout = setTimeout(() => {
                 socket.emit('mouse-move', { x: scaledX, y: scaledY });
-            }, 100);
+            }, 20);
         }
 
         function handleKeyDown(event) {

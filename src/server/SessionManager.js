@@ -8,7 +8,7 @@ class SessionManager {
     /**
      * Create a new browser session for a client
      * @param {string} sessionId - Unique session identifier (typically socket.id)
-     * @param {string} browserType - Type of browser to use ('playwright' | 'chromium' | 'webkit')
+     * @param {string} browserType - Type of browser to use ('playwright' | 'chromium' | 'webkit' | 'edge' | 'brave')
      * @param {Object} options - Browser initialization options
      * @returns {Promise<Object>} - Status of browser initialization
      */
