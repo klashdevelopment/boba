@@ -26,7 +26,7 @@ let bobaServerInstance = null;
  */
 async function startServer() {
   try {
-    console.log(`Starting Boba server with ${defaultBrowserType} browser engine...`);
+    console.log(`Starting Boba server...`);
     await server.start();
     bobaServerInstance = server;
   } catch (error) {

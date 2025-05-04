@@ -4,7 +4,7 @@ const BobaBrowser = require('./BobaBrowser');
 class BobaPlaywright extends BobaBrowser {
     /*
         * Create a new BobaPlaywright instance
-        * @param {string} browserType - Type of browser (firefox, chromium, webkit)
+        * @param {string} browserType - Type of browser (firefox, chromium, webkit, edge)
     */
   constructor(browserType = 'firefox') {
     super();
@@ -26,7 +26,9 @@ class BobaPlaywright extends BobaBrowser {
         case 'firefox':
           this.browser = await playwright.firefox.launch({
             headless: options.headless,
-            args: ['--javascript.options.wasm_js_promise_integration=true']
+            firefoxUserPrefs: {
+              "javascript.options.wasm_js_promise_integration": true
+            }
           });
           break;
         case 'chromium':
@@ -38,6 +40,20 @@ class BobaPlaywright extends BobaBrowser {
         case 'webkit':
           this.browser = await playwright.webkit.launch({
             headless: options.headless
+          });
+          break;
+        case 'edge':
+          this.browser = await playwright.chromium.launch({
+            headless: options.headless,
+            channel: 'msedge',
+            args: ['--js-flags=#enable-webassembly-jspi']
+          });
+          break;
+        case 'brave':
+          this.browser = await playwright.chromium.launch({
+            headless: options.headless,
+            executablePath: `C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe`,
+            args: ['--js-flags=#enable-webassembly-jspi']
           });
           break;
         default:
@@ -240,7 +256,7 @@ class BobaPlaywright extends BobaBrowser {
       });
     } catch (error) {
       console.error('Screenshot error:', error);
-      if(error.includes('Timeout 50000ms exceeded')) {
+      if(error.message.includes('Timeout 50000ms exceeded') || error.message.includes('has been closed')) {
         return "Screenshot timeout (session has died)";
       }
       throw error;

@@ -4,10 +4,12 @@ A modular Node.js backend using Express that can open super lightweight browsers
 
 ## Features
 
-- Multiple browser engine support:
-  - **playwright**: Firefox via Playwright
-  - **chrome**: Chromium via Playwright
-  - **webkit**: Safari (WebKit) via Playwright
+- Multiple browser engine support using Playwright:
+  - **playwright**: Firefox Nightly
+  - **chrome**: Chromium (Headless shell)
+  - **webkit**: Safari (WebKit)
+  - **edge**: Edge (Windows ONLY)
+  - **brave**: Brave (Windows ONLY) (MUST be pre-installed on x64)
 - Streams browser screenshots to connected clients using Socket.IO
 - Real-time interaction with browser (navigation, clicks, keyboard input)
 - Clean separation of project with a modular class-based architecture

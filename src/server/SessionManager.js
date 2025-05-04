@@ -27,6 +27,12 @@ class SessionManager {
                 case 'webkit':
                     browser = new BobaPlaywright('webkit');
                     break;
+                case 'edge':
+                    browser = new BobaPlaywright('edge');
+                    break;
+                case 'brave':
+                    browser = new BobaPlaywright('brave');
+                    break;
                 default:
                     throw new Error(`Unknown browser type: ${browserType}`);
             }

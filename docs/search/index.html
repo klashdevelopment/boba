@@ -93,6 +93,12 @@ h1 {
 #browser-full.safari #browser, #browser-full.safari #browser-name {
     color: rgb(130, 143, 255);
 }
+#browser-full.brave #browser, #browser-full.brave #browser-name {
+    color: rgb(255, 106, 60);
+}
+#browser-full.edge #browser, #browser-full.edge #browser-name {
+    color: rgb(130, 255, 228);
+}
 #browser-full {
     text-shadow: 0px 0px 4px black; 
 }
@@ -130,7 +136,9 @@ function sb(to) {
 }
 
 const ua = navigator.userAgent;
-if (/Chrome/.test(ua) && !/Edge|Edg|OPR/.test(ua)) sb('chrome');
+if (navigator.brave && navigator.brave.isBrave()) sb('brave');
+else if (/Edge|Edg|OPR/.test(ua)) sb('edge');
+else if (/Chrome/.test(ua) && !/Edge|Edg|OPR/.test(ua)) sb('chrome');
 else if (/Firefox/.test(ua)) sb('firefox-browser');
 else if (/Safari/.test(ua) && !/Chrome/.test(ua)) sb('safari');
 </script>

@@ -298,9 +298,11 @@
             <div class="logo">Boba<span> by </span><span class="klash">KLASH</span></div>
             <div class="browser-options">
                 <select id="browser-type">
-                    <option value="playwright">Playwright (Firefox)</option>
-                    <option value="webkit">Playwright (Safari)</option>
-                    <option value="chromium">Playwright (Chromium)</option>
+                    <option value="playwright">Firefox Nightly</option>
+                    <option value="webkit">Webkit (Safari)</option>
+                    <option value="edge">Microsoft Edge [BETA]</option>
+                    <option value="brave">Brave Browser [BETA]</option>
+                    <option value="chromium">Google Chrome</option>
                 </select>
             </div>
         </header>
@@ -419,8 +421,14 @@
                 icon.className = 'fa-solid fab fa-safari';
             } else if (selectedBrowser === 'chromium') {
                 icon.className = 'fa-solid fab fa-chrome';
-            } else {
+            } else if (selectedBrowser === 'edge') {
+                icon.className = 'fa-solid fab fa-edge';
+            } else if (selectedBrowser === 'playwright') {
                 icon.className = 'fa-solid fab fa-firefox-browser';
+            } else if (selectedBrowser === 'brave') {
+                icon.className = 'fa-solid fab fa-brave';
+            } else {
+                icon.className = 'fa-solid fab fa-globe';
             }
         });
 
@@ -482,7 +490,7 @@
                 viewportWidth: viewportSize.width,
                 viewportHeight: viewportSize.height,
                 fps: 20,
-                headless: true
+                headless: false
             });
         }
 
