@@ -18,6 +18,10 @@
             background-color: #f8f9fa;
             color: #333;
         }
+        body.dark {
+            background-color: #121212;
+            color: #e1e4e8;
+        }
 
         .container {
             max-width: 1200px;
@@ -31,6 +35,9 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid #e1e4e8;
+        }
+        body.dark header {
+            border-bottom: 1px solid #444;
         }
 
         .logo {
@@ -57,6 +64,10 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
+        body.dark .controls {
+            background-color: #1f1f20;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
         .control-group {
             display: flex;
             gap: 4px;
@@ -68,6 +79,11 @@
             border: 1px solid #e1e4e8;
             border-radius: 4px;
             font-size: 14px;
+        }
+        body.dark #url {
+            background-color: #333;
+            color: #e1e4e8;
+            border: 1px solid #444;
         }
 
         button {
@@ -106,13 +122,37 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            aspect-ratio: 16/9;
+            width: 100%;
+            max-height: calc(100vh - 250px);
         }
 
         #browser-screen {
             width: 100%;
-            height: 600px;
+            height: 100%;
             background-color: white;
             cursor: default;
+            position: relative;
+            /* Ensure content is centered and maintains ratio */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        body.dark #browser-screen {
+            background-color: #1f1f20;
+        }
+        body.dark .browser-container {
+            background-color: #1f1f20;
+            border: 1px solid #444;
+        }
+        body.dark .loading {
+            color: #e1e4e8;
+        }
+
+        #browser-screen img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         input {
@@ -181,6 +221,10 @@
             border-left-color: #6c5ce7;
             flex-shrink: 0;
         }
+        body.dark .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.144);
+            border-left-color: #6c5ce7;
+        }
 
         @keyframes spin {
             0% {
@@ -234,6 +278,17 @@
         button i {
             font-size: 20px;
         }
+        #theme-btn {
+            background-color: #0faabe;
+        }
+        body.dark select {
+            background-color: #333;
+            color: #e1e4e8;
+            border: 1px solid #444 !important;
+        }
+        select:focus-within {
+            outline: none;
+        }
     </style>
 </head>
 
@@ -251,11 +306,16 @@
         </header>
 
         <div class="controls">
+            <div class="control-group">
+                <button id="back-btn"><i class="fa-solid fa-arrow-left"></i></button>
+                <button id="next-btn"><i class="fa-solid fa-arrow-right"></i></button>
+                <button id="refresh-btn"><i class="fa-solid fa-rotate"></i></button>
+                <button id="theme-btn"><i class="fa-solid fa-sun-bright"></i></button>
+            </div>
             <input type="text" id="url" placeholder="Enter URL" value="https://boba.klash.dev/search">
-            <button id="start-btn"><span>Start</span> <i id="browser-icon" class="fa-solid fab fa-firefox-browser"></i></button>
             <div class="control-group">
                 <button id="go-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
-                <button id="refresh-btn"><i class="fa-solid fa-rotate"></i></button>
+                <button id="start-btn"><span>Start</span> <i id="browser-icon" class="fa-solid fab fa-firefox-browser"></i></button>
             </div>
         </div>
 
@@ -292,16 +352,65 @@
         const clickArea = document.getElementById('click-area');
         const statusEl = document.getElementById('status');
         const performanceEl = document.getElementById('performance');
+        const backBtn = document.getElementById('back-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const themeBtn = document.getElementById('theme-btn');
+
+        function updateTheme() {
+            if(!localStorage.getItem('theme')) {
+                localStorage.setItem('theme', 'light');
+            }
+            var theme = localStorage.getItem('theme') || 'light';
+            if(theme === 'dark') {
+                document.body.classList.add('dark')
+                themeBtn.innerHTML = '<i class="fa-solid fa-sun-bright"></i>';
+            } else {
+                document.body.classList.remove('dark')
+                themeBtn.innerHTML = '<i class="fa-solid fa-moon-stars"></i>';
+            }
+        }
+        function toggleTheme() {
+            var theme = localStorage.getItem('theme') || 'light';
+            if(theme === 'dark') {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            updateTheme();
+        }
+        themeBtn.addEventListener('click', toggleTheme);
+        updateTheme();
 
         // Variables
         let browserStarted = false;
         let renderStartTime = 0;
+        let viewportSize = { width: 1280, height: 720 };
 
         // Event listeners
         startBtn.addEventListener('click', startBrowser);
         goBtn.addEventListener('click', navigateToUrl);
         refreshBtn.addEventListener('click', refreshPage);
         clickArea.addEventListener('click', handleScreenClick);
+        clickArea.addEventListener('mousemove', handleMouseMove);
+        backBtn.addEventListener('click', () => {
+            if (!browserStarted) return;
+            socket.emit('back');
+        });
+        nextBtn.addEventListener('click', () => {
+            if (!browserStarted) return;
+            socket.emit('forward');
+        });
+        urlInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                navigateToUrl();
+            }
+        });
+        clickArea.addEventListener('wheel', (event) => {
+            if (!browserStarted) return;
+            const deltaY = event.deltaY || event.wheelDelta;
+            const deltaX = event.deltaX || event.wheelDeltaX;
+            socket.emit('scroll', { deltaX, deltaY });
+        });
         document.addEventListener('keydown', handleKeyDown);
         browserTypeSelect.addEventListener('change', () => {
             const selectedBrowser = browserTypeSelect.value;
@@ -327,12 +436,15 @@
 
         socket.on('browser-started', data => {
             browserStarted = true;
+            if (data.viewportSize) {
+                viewportSize = data.viewportSize;
+            }
             statusEl.textContent = `Browser session started successfully using ${data.browserType}.`;
             startBtn.querySelector('span').textContent = 'Restart';
         });
 
         socket.on('browser-error', data => {
-            if(data.includes('No active browser')) {
+            if((typeof data === 'string' && data.includes('No active browser')) || (data.error.killSession)) {
                 browserStarted = false;
                 statusEl.innerHTML = `<span class="error">Browser session closed, please restart</span>`;
                 startBtn.querySelector('span').textContent = 'Start';
@@ -360,16 +472,17 @@
       `;
 
             renderStartTime = performance.now();
-            const screenElement = document.getElementById('browser-screen');
-            const viewportWidth = screenElement.clientWidth;
-            const viewportHeight = screenElement.clientHeight;
+            
+            // Set fixed viewport dimensions to 1280x720
+            viewportSize = { width: 1280, height: 720 };
 
             socket.emit('start-browser', {
                 url: urlInput.value,
                 browserType: browserTypeSelect.value,
-                viewportWidth: viewportWidth,
-                viewportHeight: viewportHeight,
-                fps: 30
+                viewportWidth: viewportSize.width,
+                viewportHeight: viewportSize.height,
+                fps: 20,
+                headless: true
             });
         }
 
@@ -403,26 +516,56 @@
         function handleScreenClick(event) {
             if (!browserStarted) return;
 
-            console.log('Clicked');
-
             const img = browserScreen.querySelector('img');
             if (!img) return console.log('No image found');
 
             const rect = img.getBoundingClientRect();
+            // Calculate position relative to the image
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
+            
+            // Scale to actual browser viewport
+            const scaledX = Math.round((x / rect.width) * viewportSize.width);
+            const scaledY = Math.round((y / rect.height) * viewportSize.height);
+            
             renderStartTime = performance.now();
             socket.emit('click', { 
-                x: x,
-                y: y
+                x: scaledX, 
+                y: scaledY 
             });
             
-            statusEl.textContent = `Clicked at (${Math.round(x)}, ${Math.round(y)})`;
+            statusEl.textContent = `Clicked at (${scaledX}, ${scaledY})`;
+        }
+
+        let mouseMoveTimeout;
+        function handleMouseMove(event) {
+            if (!browserStarted) return;
+            const img = browserScreen.querySelector('img');
+            if (!img) return;
+            
+            const rect = img.getBoundingClientRect();
+            // Calculate position relative to the image
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Scale to actual browser viewport
+            const scaledX = Math.round((x / rect.width) * viewportSize.width);
+            const scaledY = Math.round((y / rect.height) * viewportSize.height);
+            
+            clearTimeout(mouseMoveTimeout);
+            mouseMoveTimeout = setTimeout(() => {
+                socket.emit('mouse-move', { x: scaledX, y: scaledY });
+            }, 100);
         }
 
         function handleKeyDown(event) {
             if (!browserStarted) return;
             if (document.activeElement === urlInput) return;
+
+            if(event.key === 'z') {
+                var oneLinerMouseTrail = `const mouseTrail = document.createElement('div'); mouseTrail.style='position: absolute; width: 10px; height: 10px; background-color: red; border-radius: 50%; pointer-events: none;'; document.body.appendChild(mouseTrail); document.addEventListener('mousemove', (e) => { mouseTrail.style.left = e.clientX + 'px'; mouseTrail.style.top = e.clientY + 'px'; });`;
+                socket.emit('inject-js', { script: oneLinerMouseTrail });
+            }
 
             renderStartTime = performance.now();
             socket.emit('type', { text: event.key });

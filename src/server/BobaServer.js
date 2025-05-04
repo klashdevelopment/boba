@@ -55,15 +55,18 @@ class BobaServer {
                         browserType,
                         { 
                             url: options.url,
-                            fps: fps
+                            fps: fps,
+                            headless: options.headless !== undefined ? options.headless : true,
                         }
                     );
 
                     if (result.success) {
+                        const sessionInfo = this.sessionManager.getSessionInfo(socket.id);
                         socket.emit('browser-started', {
                             status: 'success',
                             browserType,
-                            fps
+                            fps,
+                            viewportSize: sessionInfo.browser.viewportSize
                         });
                         this._startScreenshotInterval(socket.id);
                     } else {
@@ -120,11 +123,8 @@ class BobaServer {
                         return;
                     }
 
-                    await this._pauseScreenshots(socket.id);
                     await browser.click(data.x, data.y);
-                    this._resumeScreenshots(socket.id);
                 } catch (error) {
-                    this._resumeScreenshots(socket.id);
                     console.error('Click error:', error);
                     socket.emit('browser-error', { error: `Click error: ${error.message}` });
                 }
@@ -138,13 +138,86 @@ class BobaServer {
                         return;
                     }
 
-                    await this._pauseScreenshots(socket.id);
                     await browser.type(data.text);
-                    this._resumeScreenshots(socket.id);
                 } catch (error) {
-                    this._resumeScreenshots(socket.id);
                     console.error('Type error:', error);
                     socket.emit('browser-error', { error: `Type error: ${error.message}` });
+                }
+            });
+
+            socket.on('mouse-move', async (data) => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+
+                    await browser.mouseMove(data.x, data.y);
+                } catch (error) {
+                    console.error('Mouse move error:', error);
+                    socket.emit('browser-error', { error: `Mouse move error: ${error.message}` });
+                }
+            });
+
+            socket.on('back', async () => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+
+                    await browser.back();
+                }
+                catch (error) {
+                    console.error('Back error:', error);
+                    socket.emit('browser-error', { error: `Back error: ${error.message}` });
+                }
+            });
+
+            socket.on('forward', async () => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+
+                    await browser.forward();
+                } catch (error) {
+                    console.error('Forward error:', error);
+                    socket.emit('browser-error', { error: `Forward error: ${error.message}` });
+                }
+            });
+
+            socket.on('inject-js', async (data) => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+
+                    await browser.injectJs(data.script);
+                } catch (error) {
+                    console.error('Inject JS error:', error);
+                    socket.emit('browser-error', { error: `Inject JS error: ${error.message}` });
+                }
+            });
+
+            socket.on('scroll', async (data) => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+
+                    await browser.scroll(data.deltaX, data.deltaY);
+                } catch (error) {
+                    console.error('Scroll error:', error);
+                    socket.emit('browser-error', { error: `Scroll error: ${error.message}` });
                 }
             });
 
@@ -217,6 +290,11 @@ class BobaServer {
             if (!screenshot) {
                 console.warn('Screenshot is undefined or null');
                 socket.emit('browser-error', { error: 'Failed to capture screenshot' });
+                return;
+            }
+
+            if(screenshot === "Screenshot timeout (session has died)") {
+                socket.emit('browser-error', { error: 'Session has died', killSession: true });
                 return;
             }
 

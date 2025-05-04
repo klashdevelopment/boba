@@ -4,7 +4,7 @@ class BobaBrowser {
      * @param {Object} options - Browser initialization options
      * @returns {Promise<void>}
      */
-    async initialize(options = {}) {
+    async initialize(options = {headless: true}) {
         throw new Error('Method initialize() must be implemented by subclass');
     }
 
@@ -34,6 +34,51 @@ class BobaBrowser {
      */
     async type(text) {
         throw new Error('Method type() must be implemented by subclass');
+    }
+
+    /**
+     * Mouse move to a specific coordinate
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {Promise<void>}
+     */
+    async mouseMove(x, y) {
+        throw new Error('Method mouseMove() must be implemented by subclass');
+    }
+
+    /**
+     * Inject JavaScript into the page
+     * @param {string} js - The JavaScript code to inject
+     * @returns {Promise<void>}
+     */
+    async injectJs(js) {
+        throw new Error('Method injectJs() must be implemented by subclass');
+    }
+
+    /**
+     * Called on wheel to scroll the page
+     * @param {number} deltaX - Horizontal scroll amount
+     * @param {number} deltaY - Vertical scroll amount
+     * @returns {Promise<void>}
+    */
+    async scroll(deltaX, deltaY) {
+        throw new Error('Method scroll() must be implemented by subclass');
+    }
+
+    /**
+     * Go back in the browser history
+     * @returns {Promise<void>}
+     */
+    async back() {
+        throw new Error('Method back() must be implemented by subclass');
+    }
+
+    /**
+     * Go forward in the browser history
+     * @returns {Promise<void>}
+     */
+    async forward() {
+        throw new Error('Method forward() must be implemented by subclass');
     }
 
     /**

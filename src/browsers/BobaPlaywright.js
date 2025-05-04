@@ -12,8 +12,6 @@ class BobaPlaywright extends BobaBrowser {
     this.browser = null;
     this.context = null;
     this.page = null;
-    this.lastInteraction = 0;
-    this.isInteracting = false;
     this.viewportSize = { width: 1280, height: 720 };
   }
   
@@ -22,40 +20,50 @@ class BobaPlaywright extends BobaBrowser {
    * @param {Object} options - Browser initialization options
    * @returns {Promise<void>}
    */
-  async initialize(options = {}) {
+  async initialize(options = {headless: true}) {
     try {
       switch (this.browserType) {
         case 'firefox':
           this.browser = await playwright.firefox.launch({
-            headless: true
+            headless: options.headless,
+            args: ['--javascript.options.wasm_js_promise_integration=true']
           });
           break;
         case 'chromium':
           this.browser = await playwright.chromium.launch({
-            headless: true
+            headless: options.headless,
+            args: ['--js-flags=#enable-webassembly-jspi']
           });
           break;
         case 'webkit':
           this.browser = await playwright.webkit.launch({
-            headless: true
+            headless: options.headless
           });
           break;
         default:
           throw new Error(`Unsupported browser type: ${this.browserType}`);
       }
-      const viewportWidth = options.viewportWidth || 1280;
-      const viewportHeight = options.viewportHeight || 720;
-      this.viewportSize = { width: viewportWidth, height: viewportHeight };
       
+      // Ensure viewport dimensions are properly set as integers
+      const viewportWidth = parseInt(options.viewportWidth) || 1280;
+      const viewportHeight = parseInt(options.viewportHeight) || 720;
+      
+      this.viewportSize = { 
+        width: viewportWidth, 
+        height: viewportHeight 
+      };
+      
+      // Create browser context with exact viewport size
       this.context = await this.browser.newContext({
-        viewport: this.viewportSize
+        viewport: this.viewportSize,
+        deviceScaleFactor: 1.0 // Force 1:1 pixel ratio
       });
       
       this.page = await this.context.newPage();
       const url = options?.url || 'https://pages.klash.dev/search';
       await this.navigate(url);
       
-      return { success: true };
+      return { success: true, viewportSize: this.viewportSize };
     } catch (error) {
       console.error('Error initializing BobaPlaywright:', error);
       throw error;
@@ -73,30 +81,10 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      this.isInteracting = true;
       await this.page.goto(url);
-      this.lastInteraction = Date.now();
-      this.isInteracting = false;
     } catch (error) {
-      this.isInteracting = false;
       console.error('Navigation error:', error);
       throw error;
-    }
-  }
-  
-  /**
-   * Wait for the browser to be ready for interaction
-   * @param {number} minDelay - Minimum delay after last interaction
-   * @returns {Promise<void>}
-   * @private 
-   */
-  async _waitForReady(minDelay = 100) {
-    const timeSinceLastInteraction = Date.now() - this.lastInteraction;
-    if (timeSinceLastInteraction < minDelay) {
-      await new Promise(resolve => setTimeout(resolve, minDelay - timeSinceLastInteraction));
-    }
-    while (this.isInteracting) {
-      await new Promise(resolve => setTimeout(resolve, 50));
     }
   }
   
@@ -112,20 +100,12 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      await this._waitForReady();
-      this.isInteracting = true;
-      
       // ensure not negative
       x = Math.max(0, parseInt(x) || 0);
       y = Math.max(0, parseInt(y) || 0);
       
       await this.page.mouse.click(x, y);
-      this.lastInteraction = Date.now();
-      this.isInteracting = false;
-
-      await new Promise(resolve => setTimeout(resolve, 150));
     } catch (error) {
-      this.isInteracting = false;
       console.error('Click error:', error);
       throw error;
     }
@@ -142,16 +122,103 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      await this._waitForReady();
-      this.isInteracting = true;
       await this.page.keyboard.press(text);
-      
-      this.lastInteraction = Date.now();
-      this.isInteracting = false;
-      await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {
-      this.isInteracting = false;
       console.error('Type error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Move mouse to a specific coordinate
+   * @param {number} x - X coordinate from client
+   * @param {number} y - Y coordinate from client
+   * @returns {Promise<void>}
+   */
+  async mouseMove(x, y) {
+    if (!this.page) {
+      throw new Error('Browser not initialized');
+    }
+    
+    try {
+      // ensure not negative
+      x = Math.max(0, parseInt(x) || 0);
+      y = Math.max(0, parseInt(y) || 0);
+      
+      await this.page.mouse.move(x, y);
+    } catch (error) {
+      console.error('Mouse move error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Inject JavaScript into the page
+   * @param {string} js - The JavaScript code to inject
+   * @returns {Promise<void>}
+   * */
+  async injectJs(js) {
+    if (!this.page) {
+      throw new Error('Browser not initialized');
+    }
+    
+    try {
+      await this.page.evaluate(js);
+    } catch (error) {
+      console.error('Inject JS error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Called on wheel to scroll the page
+   * @param {number} deltaX - Scroll delta
+   * @param {number} deltaY - Scroll delta
+   * * @returns {Promise<void>}
+   */
+  async scroll(deltaX, deltaY) {
+    if (!this.page) {
+      throw new Error('Browser not initialized');
+    }
+    
+    try {
+      await this.page.mouse.wheel(deltaX, deltaY);
+    } catch (error) {
+      console.error('Scroll error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Go back in the browser history
+   * @returns {Promise<void>}
+   */
+  async back() {
+    if (!this.page) {
+      throw new Error('Browser not initialized');
+    }
+    
+    try {
+      await this.page.goBack();
+    } catch (error) {
+      console.error('Back error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Go forward in the browser history
+   * @returns {Promise<void>}
+   */
+  async forward() {
+    if (!this.page) {
+      throw new Error('Browser not initialized');
+    }
+    
+    try {
+      await this.page.goForward();
+    } catch (error) {
+      console.error('Forward error:', error);
       throw error;
     }
   }
@@ -166,8 +233,6 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      await this._waitForReady(50);
-      
       return await this.page.screenshot({ 
         type: 'jpeg', 
         quality: 100,
@@ -175,6 +240,9 @@ class BobaPlaywright extends BobaBrowser {
       });
     } catch (error) {
       console.error('Screenshot error:', error);
+      if(error.includes('Timeout 50000ms exceeded')) {
+        return "Screenshot timeout (session has died)";
+      }
       throw error;
     }
   }
