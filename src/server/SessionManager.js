@@ -104,7 +104,6 @@ class SessionManager {
                 return true;
             } catch (error) {
                 console.error(`Error closing session ${sessionId}:`, error);
-                // Still remove the session from the registry
                 delete this.sessions[sessionId];
             }
         }

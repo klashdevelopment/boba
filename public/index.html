@@ -46,6 +46,14 @@
             font-weight: bold;
             margin-right: 15px;
             color: #6c5ce7;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo img {
+            height: 32px;
+            width: 32px;
+            vertical-align: middle;
         }
 
         .logo span {
@@ -374,12 +382,14 @@
             display: none;
         }
     </style>
+
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 </head>
 
 <body>
     <div class="container">
         <header>
-            <div class="logo">Boba<span> by </span><span class="klash">KLASH</span></div>
+            <div class="logo"><img src="/brand/square.png"> Boba<span> by </span><span class="klash">KLASH</span></div>
             <div class="browser-options">
                 <select id="browser-type">
                     <option value="playwright">Firefox Nightly</option>
@@ -606,7 +616,7 @@
                 browserType: browserTypeSelect.value,
                 viewportWidth: viewportSize.width,
                 viewportHeight: viewportSize.height,
-                fps: 20,
+                fps: 30,
                 headless: true
             });
         }

@@ -2,10 +2,10 @@ const playwright = require('playwright');
 const BobaBrowser = require('./BobaBrowser');
 
 class BobaPlaywright extends BobaBrowser {
-    /*
-        * Create a new BobaPlaywright instance
-        * @param {string} browserType - Type of browser (firefox, chromium, webkit, edge)
-    */
+  /**
+   * Create a new BobaPlaywright instance
+   * @param {string} browserType - Type of browser (firefox, chromium, webkit, edge)
+   */
   constructor(browserType = 'firefox') {
     super();
     this.browserType = browserType;
@@ -60,7 +60,6 @@ class BobaPlaywright extends BobaBrowser {
           throw new Error(`Unsupported browser type: ${this.browserType}`);
       }
       
-      // Ensure viewport dimensions are properly set as integers
       const viewportWidth = parseInt(options.viewportWidth) || 1280;
       const viewportHeight = parseInt(options.viewportHeight) || 720;
       
@@ -68,11 +67,9 @@ class BobaPlaywright extends BobaBrowser {
         width: viewportWidth, 
         height: viewportHeight 
       };
-      
-      // Create browser context with exact viewport size
       this.context = await this.browser.newContext({
         viewport: this.viewportSize,
-        deviceScaleFactor: 1.0 // Force 1:1 pixel ratio
+        deviceScaleFactor: 1.0
       });
       
       this.page = await this.context.newPage();
@@ -116,7 +113,6 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      // ensure not negative
       x = Math.max(0, parseInt(x) || 0);
       y = Math.max(0, parseInt(y) || 0);
       
@@ -157,7 +153,6 @@ class BobaPlaywright extends BobaBrowser {
     }
     
     try {
-      // ensure not negative
       x = Math.max(0, parseInt(x) || 0);
       y = Math.max(0, parseInt(y) || 0);
       
@@ -255,9 +250,10 @@ class BobaPlaywright extends BobaBrowser {
         timeout: 100000
       });
     } catch (error) {
-      console.error('Screenshot error:', error);
-      if(error.message.includes('Timeout 50000ms exceeded') || error.message.includes('has been closed')) {
+      if(error.message.includes('ms exceeded') || error.message.includes('has been closed')) {
         return "Screenshot timeout (session has died)";
+      } else {
+        console.error('Screenshot error:', error);
       }
       throw error;
     }

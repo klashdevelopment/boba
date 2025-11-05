@@ -10,15 +10,13 @@ function parseBrowserTypeFromArgs() {
     const args = process.argv.slice(2);
     
     for (let i = 0; i < args.length; i++) {
-      // Check for --browser=value or --browser value format
       if (args[i].startsWith('--browser=')) {
         return args[i].split('=')[1];
       } else if (args[i] === '--browser' && i + 1 < args.length) {
         return args[i + 1];
       }
     }
-    
-    // Default to playwright if not specified
+
     return 'playwright';
   }
   
