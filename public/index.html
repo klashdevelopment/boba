@@ -377,6 +377,7 @@
         .control-pane button:hover {
             background-color: #cf274e;
         }
+        
 
         .hidden {
             display: none;
@@ -412,6 +413,11 @@
             <div class="control-group">
                 <button id="go-btn" class="disabled"><i class="fa-solid fa-magnifying-glass"></i></button>
                 <button id="code-btn" class="disabled"><i class="fa-solid fa-regular fa-gear-code"></i></button>
+                <button id="resolution-btn" class="disabled">
+                    <i class="fa-solid fa-regular fa-desktop"></i>
+                    <select id="resolution-select" style="opacity:0; position:absolute; top:10px;">
+                    </select>
+                </button>
                 <button id="start-btn"><span>Start</span> <i id="browser-icon" class="fa-solid fab fa-firefox-browser"></i></button>
             </div>
         </div>
@@ -448,6 +454,19 @@
         // Connect to Socket.IO server
         const socket = io();
 
+        const res = {
+            "1:1": { width: 800, height: 800 },
+            "4:3": { width: 1024, height: 768 },
+            "16:10SD": { width: 1280, height: 800 },
+            "16:9SD": { width: 1280, height: 720 },
+            "16:9HD": { width: 1920, height: 1080 },
+            "16:9UHD": { width: 3840, height: 2160 },
+            "20:11SD": { width: 1200, height: 660 },
+            "20:11HD": { width: 1920, height: 1056 },
+            "9:16": { width: 720, height: 1280 },
+            "10:16": { width: 800, height: 1280 }
+        };
+
         // DOM elements
         const startBtn = document.getElementById('start-btn');
         const goBtn = document.getElementById('go-btn');
@@ -466,7 +485,14 @@
         const developerConsole = document.querySelector('.developer-console');
         const executeBtn = document.getElementById('execute-btn');
 
-        const buttons = [startBtn, goBtn, refreshBtn, backBtn, nextBtn, devtoolBtn, themeBtn];
+        const resolutionBtn = document.getElementById('resolution-btn');
+        const resolutionSelect = document.getElementById('resolution-select');
+
+        resolutionSelect.innerHTML = Object.keys(res).map(key => {
+            return `<option value="${key}">${key} (${res[key].width}x${res[key].height})</option>`;
+        }).join('');
+
+        const buttons = [startBtn, goBtn, refreshBtn, backBtn, nextBtn, devtoolBtn, themeBtn, resolutionBtn];
 
         function updateTheme() {
             if(!localStorage.getItem('theme')) {
@@ -523,6 +549,10 @@
             const deltaX = event.deltaX || event.wheelDeltaX;
             socket.emit('scroll', { deltaX, deltaY });
         });
+        resolutionBtn.addEventListener('click', () => {
+            // open resolution select
+            resolutionSelect.click();
+        });
         document.addEventListener('keydown', handleKeyDown);
         browserTypeSelect.addEventListener('change', () => {
             const selectedBrowser = browserTypeSelect.value;
@@ -549,6 +579,14 @@
             const code = devtool.value;
             socket.emit('inject-js', { script: code });
             statusEl.textContent = `Executing developer console code...`;
+        });
+
+        resolutionSelect.addEventListener('change', () => {
+            const selectedRes = resolutionSelect.value;
+            if (res[selectedRes]) {
+                const { width, height } = res[selectedRes];
+                resizeDisplay(width, height);
+            }
         });
 
         function toggleButtons(disabled) {
@@ -633,6 +671,12 @@
             socket.emit('navigate', {
                 url: urlInput.value
             });
+        }
+
+        function resizeDisplay(width, height) {
+            if (!browserStarted) return;
+            viewportSize = { width, height };
+            socket.emit('resize', { width, height });
         }
 
         function refreshPage() {

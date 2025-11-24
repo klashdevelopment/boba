@@ -28,6 +28,16 @@ class BobaBrowser {
     }
 
     /**
+     * Resize the browser viewport
+     * @param {number} width - Width of the viewport
+     * @param {number} height - Height of the viewport
+     * @returns {Promise<void>}
+     */
+    async resize(width, height) {
+        throw new Error('Method resize() must be implemented by subclass');
+    }
+
+    /**
      * Type text
      * @param {string} text - The text to type
      * @returns {Promise<void>}

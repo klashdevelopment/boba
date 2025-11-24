@@ -122,6 +122,29 @@ class BobaPlaywright extends BobaBrowser {
       throw error;
     }
   }
+
+  /**
+   * Resize the browser viewport
+   * @param {number} width - Width of the viewport
+   * @param {number} height - Height of the viewport
+   * @returns {Promise<void>}
+   */
+  async resize(width, height) {
+    if (!this.page) {
+      throw new Error('Browser not initialized');
+    }
+    try {
+      const parsedWidth = parseInt(width, 10);
+      const parsedHeight = parseInt(height, 10);
+      width = Math.min(2000, Math.max(100, Number.isNaN(parsedWidth) ? 1280 : parsedWidth));
+      height = Math.min(2000, Math.max(100, Number.isNaN(parsedHeight) ? 720 : parsedHeight));
+      this.viewportSize = { width, height };
+      await this.page.setViewportSize(this.viewportSize);
+    } catch (error) {
+      console.error('Resize error:', error);
+      throw error;
+    }
+  }
   
   /**
    * Type text

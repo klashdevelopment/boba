@@ -221,6 +221,20 @@ class BobaServer {
                 }
             });
 
+            socket.on('resize', async (data) => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+                    await browser.resize(data.width, data.height);
+                } catch (error) {
+                    console.error('Resize error:', error);
+                    socket.emit('browser-error', { error: `Resize error: ${error.message}` });
+                }
+            });
+
             socket.on('disconnect', () => {
                 console.log('Client disconnected:', socket.id);
                 this._stopScreenshotInterval(socket.id);
