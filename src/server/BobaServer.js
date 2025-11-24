@@ -80,7 +80,7 @@ class BobaServer {
 
             socket.on('set-fps', (data) => {
                 try {
-                    const fps = parseInt(data.fps, 5) || this.options.defaultFps;
+                    const fps = parseInt(data.fps) || this.options.defaultFps;
                     const sessionInfo = this.sessionManager.getSessionInfo(socket.id);
                     
                     if (!sessionInfo) {
@@ -96,6 +96,22 @@ class BobaServer {
                     console.log(`Updated FPS to ${fps} for session ${socket.id}`);
                 } catch (error) {
                     console.error('Error updating FPS:', error);
+                    socket.emit('browser-error', { error: error.message });
+                }
+            });
+
+            socket.on('set-image-quality', async (data) => {
+                try {
+                    const browser = this.sessionManager.getSession(socket.id);
+                    if (!browser) {
+                        socket.emit('browser-error', { error: 'No active browser session' });
+                        return;
+                    }
+                    await browser.setQuality(data.quality);
+                    socket.emit('image-quality-updated', { quality: data.quality });
+                    console.log(`Updated image quality to ${data.quality} for session ${socket.id}`);
+                } catch (error) {
+                    console.error('Error updating image quality:', error);
                     socket.emit('browser-error', { error: error.message });
                 }
             });

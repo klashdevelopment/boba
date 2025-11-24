@@ -429,6 +429,8 @@
             color: #2b2b2b;
             user-select: none;
             -webkit-user-select: none;
+            max-height: 450px;
+            overflow-y: auto;
         }
 
         .resolution-popup:not(.hidden) {
@@ -575,9 +577,7 @@
                                 const opts = Array.from(select.querySelectorAll('option'));
                                 if (opts.length === 0) {
                                     const defaults = [
-                                        { value: '16:9SD', text: '16:9 SD (1280×720)' },
-                                        { value: '16:9HD', text: '16:9 HD (1920×1080)' },
-                                        { value: '1:1', text: '1:1 (800×800)' }
+                                        { value: '16:9SD', text: 'Options loading...' }
                                     ];
                                     defaults.forEach(o => {
                                         const el = document.createElement('div');
@@ -667,7 +667,16 @@
             "20:11SD": { width: 1200, height: 660 },
             "20:11HD": { width: 1920, height: 1056 },
             "9:16": { width: 720, height: 1280 },
-            "10:16": { width: 800, height: 1280 }
+            "10:16": { width: 800, height: 1280 },
+            "Image Q20": { width: "Quality", height: 20 },
+            "Image Q40": { width: "Quality", height: 40 },
+            "Image Q60": { width: "Quality", height: 60 },
+            "Image Q80": { width: "Quality", height: 80 },
+            "Image Q100": { width: "Quality", height: 100 },
+            "FPS Low": { width: "FPS", height: 10 },
+            "FPS Medium": { width: "FPS", height: 30 },
+            "FPS High": { width: "FPS", height: 60 },
+            "FPS Ultra": { width: "FPS", height: 120 }
         };
 
         // DOM elements
@@ -692,7 +701,7 @@
         const resolutionSelect = document.getElementById('resolution-select');
 
         resolutionSelect.innerHTML = Object.keys(res).map(key => {
-            return `<option value="${key}">${key} (${res[key].width}x${res[key].height})</option>`;
+            return `<option value="${key}">${key} (${res[key].width}${key.includes(':')?'x':' '}${res[key].height})</option>`;
         }).join('');
 
         const buttons = [startBtn, goBtn, refreshBtn, backBtn, nextBtn, devtoolBtn, themeBtn, resolutionBtn];
@@ -786,6 +795,18 @@
 
         resolutionSelect.addEventListener('change', () => {
             const selectedRes = resolutionSelect.value;
+            if(selectedRes.includes('Image Q')) {
+                const quality = res[selectedRes].height;
+                socket.emit('set-image-quality', { quality });
+                statusEl.textContent = `Setting image quality to ${quality}...`;
+                return;
+            }
+            if(selectedRes.includes('FPS')) {
+                const fps = res[selectedRes].height;
+                socket.emit('set-fps', { fps });
+                statusEl.textContent = `Setting FPS to ${fps}...`;
+                return;
+            }
             if (res[selectedRes]) {
                 const { width, height } = res[selectedRes];
                 resizeDisplay(width, height);

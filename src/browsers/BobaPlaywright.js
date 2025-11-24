@@ -13,6 +13,7 @@ class BobaPlaywright extends BobaBrowser {
     this.context = null;
     this.page = null;
     this.viewportSize = { width: 1280, height: 720 };
+    this.quality = 80; // default screenshot quality
   }
   
   /**
@@ -72,7 +73,6 @@ class BobaPlaywright extends BobaBrowser {
         deviceScaleFactor: 1.0
       });
 
-      // route local.boba to the /local/ folder
       this.context.route('**://**example.com/**', async (route) => {
         console.log('Intercepted request to:', route.request().url());
         const reqUrl = route.request().url();
@@ -89,7 +89,7 @@ class BobaPlaywright extends BobaBrowser {
         } else {
           return route.fulfill({
             status: 404,
-            body: 'Not Found -- local.boba request -- config file missing!! please copy from repo if you deleted it!!'
+            body: 'Not Found -- example.com boba request -- config file missing!! please copy from repo if you deleted it!!'
           });
         }
 
@@ -107,7 +107,7 @@ class BobaPlaywright extends BobaBrowser {
         } else {
           route.fulfill({
             status: 404,
-            body: 'Not Found -- local.boba request -- page not found'
+            body: 'Not Found -- example.com boba request -- page not found'
           });
         }
       });
@@ -227,6 +227,16 @@ class BobaPlaywright extends BobaBrowser {
   }
 
   /**
+   * Quality setting for screenshots
+   * @param {number} quality - Quality (1-100)
+   * @returns {Promise<void>}
+   */
+  async setQuality(quality) {
+    const parsedQuality = parseInt(quality, 10);
+    this.quality = Math.min(100, Math.max(1, Number.isNaN(parsedQuality) ? 80 : parsedQuality));
+  }
+
+  /**
    * Inject JavaScript into the page
    * @param {string} js - The JavaScript code to inject
    * @returns {Promise<void>}
@@ -309,7 +319,7 @@ class BobaPlaywright extends BobaBrowser {
     try {
       return await this.page.screenshot({ 
         type: 'jpeg', 
-        quality: 100,
+        quality: this.quality || 80,
         timeout: 100000
       });
     } catch (error) {

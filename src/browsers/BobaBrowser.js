@@ -38,6 +38,15 @@ class BobaBrowser {
     }
 
     /**
+     * Quality setting for screenshots
+     * @param {number} quality - Quality (1-100)
+     * @returns {Promise<void>}
+     */
+    async setQuality(quality) {
+        throw new Error('Method setQuality() must be implemented by subclass');
+    }
+
+    /**
      * Type text
      * @param {string} text - The text to type
      * @returns {Promise<void>}
