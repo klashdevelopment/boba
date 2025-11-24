@@ -71,6 +71,46 @@ class BobaPlaywright extends BobaBrowser {
         viewport: this.viewportSize,
         deviceScaleFactor: 1.0
       });
+
+      // route local.boba to the /local/ folder
+      this.context.route('**://**example.com/**', async (route) => {
+        console.log('Intercepted request to:', route.request().url());
+        const reqUrl = route.request().url();
+        let path = reqUrl.replace(/^https?:\/\/(www\.)?example\.com\/?/, '');
+        if(path === '' || path.endsWith('/')) {
+          path += 'index.html';
+        }
+        const fs = require('fs');
+        const configPath = require('path').join('{DIR}/../../local/'.replace('{DIR}', __dirname), 'local.json');
+        let config = null;
+        if (fs.existsSync(configPath)) {
+          const rawData = fs.readFileSync(configPath);
+          config = JSON.parse(rawData);
+        } else {
+          return route.fulfill({
+            status: 404,
+            body: 'Not Found -- local.boba request -- config file missing!! please copy from repo if you deleted it!!'
+          });
+        }
+
+        if(!config.local || !config.local.enabled) {
+          return route.continue();
+        }
+        
+        const localPath = require('path').join(config.local.folder.replace('{DIR}', __dirname), path);
+        console.log('Serving local file:', localPath);
+        if (fs.existsSync(localPath)) {
+          const content = fs.readFileSync(localPath);
+          route.fulfill({
+            body: content
+          });
+        } else {
+          route.fulfill({
+            status: 404,
+            body: 'Not Found -- local.boba request -- page not found'
+          });
+        }
+      });
       
       this.page = await this.context.newPage();
       const url = options?.url || 'https://pages.klash.dev/search';

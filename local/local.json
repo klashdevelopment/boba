@@ -1,0 +1,7 @@
+{
+    "local": {
+        "COMMENT": "Relative to src/browsers. Use {DIR} to refer to src/browsers.",
+        "folder": "{DIR}/../../local/",
+        "enabled": true
+    }
+}

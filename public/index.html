@@ -19,6 +19,7 @@
             background-color: #f8f9fa;
             color: #333;
         }
+
         body.dark {
             background-color: #121212;
             color: #e1e4e8;
@@ -37,6 +38,7 @@
             padding-bottom: 10px;
             border-bottom: 1px solid #e1e4e8;
         }
+
         body.dark header {
             border-bottom: 1px solid #444;
         }
@@ -50,6 +52,7 @@
             align-items: center;
             gap: 8px;
         }
+
         .logo img {
             height: 32px;
             width: 32px;
@@ -73,10 +76,12 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
+
         body.dark .controls {
             background-color: #1f1f20;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .control-group {
             display: flex;
             gap: 4px;
@@ -89,6 +94,7 @@
             border-radius: 4px;
             font-size: 14px;
         }
+
         body.dark #url {
             background-color: #333;
             color: #e1e4e8;
@@ -111,6 +117,7 @@
             font-weight: 500;
             transition: background-color 0.2s;
         }
+
         #start-btn {
             background-color: rgb(255, 123, 0);
         }
@@ -148,13 +155,16 @@
             justify-content: center;
             align-items: center;
         }
+
         body.dark #browser-screen {
             background-color: #1f1f20;
         }
+
         body.dark .browser-container {
             background-color: #1f1f20;
             border: 1px solid #444;
         }
+
         body.dark .loading {
             color: #e1e4e8;
         }
@@ -231,6 +241,7 @@
             border-left-color: #6c5ce7;
             flex-shrink: 0;
         }
+
         body.dark .spinner {
             border: 4px solid rgba(255, 255, 255, 0.144);
             border-left-color: #6c5ce7;
@@ -277,25 +288,31 @@
                 justify-content: center;
                 align-items: center;
             }
+
             #browser-screen {
                 width: 100%;
                 height: 100%;
             }
         }
+
         #browser-icon {
             font-weight: 400 !important;
         }
+
         button i {
             font-size: 20px;
         }
+
         #theme-btn {
             background-color: #0faabe;
         }
+
         body.dark select {
             background-color: #333;
             color: #e1e4e8;
             border: 1px solid #444 !important;
         }
+
         *:focus-visible {
             outline: 2px solid #ffffff70;
         }
@@ -334,10 +351,12 @@
             gap: 5px;
             font-size: 14px;
         }
+
         body.dark .developer-console {
             background-color: #0d0d1050;
             border-top: 1px solid #444;
         }
+
         #devtool {
             width: calc(100% - 45px);
             height: 100%;
@@ -349,6 +368,7 @@
             font-size: 14px;
             color: #333;
         }
+
         body.dark #devtool {
             background-color: #33334150;
             color: #e1e4e8;
@@ -361,11 +381,13 @@
             flex-direction: row;
             gap: 5px;
         }
+
         .line-vert {
             width: 1px;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.1);
         }
+
         body.dark .line-vert {
             background-color: rgba(255, 255, 255, 0.3);
         }
@@ -374,13 +396,106 @@
             padding: 5px 10px;
             background-color: #e3476b;
         }
+
         .control-pane button:hover {
             background-color: #cf274e;
         }
-        
+
 
         .hidden {
             display: none;
+        }
+
+        #resolution-btn {
+            position: relative;
+        }
+
+        .resolution-popup {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            min-width: 220px;
+            background: linear-gradient(180deg, #ffffff, #fbf8ff);
+            border: 1px solid rgba(108, 92, 231, 0.15);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.12);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 9999;
+            transform-origin: top right;
+            transition: transform 160ms cubic-bezier(.2, .9, .25, 1), opacity 160ms;
+            opacity: 0;
+            transform: translateY(-6px) scale(0.98);
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            color: #2b2b2b;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .resolution-popup:not(.hidden) {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .resolution-popup .res-header {
+            padding: 10px 12px;
+            background: linear-gradient(90deg, rgba(108, 92, 231, 0.08), rgba(111, 66, 193, 0.02));
+            font-weight: 600;
+            color: #3d2f8a;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(108, 92, 231, 0.06);
+        }
+
+        .resolution-popup .res-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 8px;
+        }
+
+        .resolution-popup .res-option {
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 120ms, color 120ms, transform 90ms;
+            font-size: 13px;
+            color: #2b2b2b;
+        }
+
+        .resolution-popup .res-option:hover {
+            background: linear-gradient(90deg, rgba(108, 92, 231, 0.12), rgba(108, 92, 231, 0.06));
+            color: rgb(22, 0, 36);
+            transform: translateY(-1px);
+        }
+
+        .resolution-popup .res-option.custom {
+            color: #7a4fd6;
+            font-weight: 600;
+        }
+
+        .resolution-popup::before {
+            content: "";
+            position: absolute;
+            top: -7px;
+            right: 16px;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(180deg, #ffffff, #fbf8ff);
+            transform: rotate(45deg);
+            border-left: 1px solid rgba(108, 92, 231, 0.05);
+            border-top: 1px solid rgba(108, 92, 231, 0.05);
+            z-index: -1;
+        }
+
+        @media (max-width:700px) {
+            .resolution-popup {
+                right: 8px;
+                left: 8px;
+                min-width: auto;
+            }
+
+            .resolution-popup::before {
+                right: 32px;
+            }
         }
     </style>
 
@@ -415,10 +530,98 @@
                 <button id="code-btn" class="disabled"><i class="fa-solid fa-regular fa-gear-code"></i></button>
                 <button id="resolution-btn" class="disabled">
                     <i class="fa-solid fa-regular fa-desktop"></i>
-                    <select id="resolution-select" style="opacity:0; position:absolute; top:10px;">
-                    </select>
+                    <select id="resolution-select" style="display:none;"></select>
+
+                    <div id="resolution-select-popup" class="resolution-popup hidden" aria-hidden="true">
+                        <div class="res-header">Choose resolution</div>
+                        <div class="res-options">
+                            <div class="res-option" data-value="1:1">1:1 (800×800)</div>
+                            <div class="res-option" data-value="16:9SD">16:9 SD (1280×720)</div>
+                            <div class="res-option" data-value="16:9HD">16:9 HD (1920×1080)</div>
+                            <div class="res-option" data-value="9:16">9:16 (720×1280)</div>
+                            <div class="res-option" data-value="10:16">10:16 (800×1280)</div>
+                            <div class="res-option custom" data-value="custom">Custom…</div>
+                        </div>
+                    </div>
+
+                    <script>
+                        (function () {
+                            const select = document.getElementById('resolution-select');
+                            const popup = document.getElementById('resolution-select-popup');
+                            const btn = document.getElementById('resolution-btn');
+                            function openPopup() {
+                                popup.classList.remove('hidden');
+                                popup.setAttribute('aria-hidden', 'false');
+                                document.addEventListener('click', outsideClick);
+                                document.addEventListener('keydown', onKeyDown);
+                            }
+                            function closePopup() {
+                                popup.classList.add('hidden');
+                                popup.setAttribute('aria-hidden', 'true');
+                                document.removeEventListener('click', outsideClick);
+                                document.removeEventListener('keydown', onKeyDown);
+                            }
+                            function togglePopup() {
+                                if (popup.classList.contains('hidden')) openPopup();
+                                else closePopup();
+                            }
+                            select.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                togglePopup();
+                            });
+                            function rebuildOptions() {
+                                const container = popup.querySelector('.res-options');
+                                container.innerHTML = '';
+                                const opts = Array.from(select.querySelectorAll('option'));
+                                if (opts.length === 0) {
+                                    const defaults = [
+                                        { value: '16:9SD', text: '16:9 SD (1280×720)' },
+                                        { value: '16:9HD', text: '16:9 HD (1920×1080)' },
+                                        { value: '1:1', text: '1:1 (800×800)' }
+                                    ];
+                                    defaults.forEach(o => {
+                                        const el = document.createElement('div');
+                                        el.className = 'res-option';
+                                        el.dataset.value = o.value;
+                                        el.textContent = o.text;
+                                        container.appendChild(el);
+                                    });
+                                } else {
+                                    opts.forEach(opt => {
+                                        const el = document.createElement('div');
+                                        el.className = 'res-option';
+                                        el.dataset.value = opt.value;
+                                        el.textContent = opt.textContent || opt.innerText || opt.value;
+                                        container.appendChild(el);
+                                    });
+                                }
+                                container.querySelectorAll('.res-option').forEach(el => {
+                                    el.addEventListener('click', () => {
+                                        const val = el.dataset.value;
+                                        select.value = val;
+                                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                                        closePopup();
+                                    });
+                                });
+                            }
+                            const mo = new MutationObserver(() => {
+                                rebuildOptions();
+                            });
+                            mo.observe(select, { childList: true, subtree: true, characterData: true });
+                            rebuildOptions();
+                            function outsideClick(e) {
+                                if (!popup.contains(e.target) && !btn.contains(e.target)) {
+                                    closePopup();
+                                }
+                            }
+                            function onKeyDown(e) {
+                                if (e.key === 'Escape') closePopup();
+                            }
+                        })();
+                    </script>
                 </button>
-                <button id="start-btn"><span>Start</span> <i id="browser-icon" class="fa-solid fab fa-firefox-browser"></i></button>
+                <button id="start-btn"><span>Start</span> <i id="browser-icon"
+                        class="fa-solid fab fa-firefox-browser"></i></button>
             </div>
         </div>
 
@@ -495,11 +698,11 @@
         const buttons = [startBtn, goBtn, refreshBtn, backBtn, nextBtn, devtoolBtn, themeBtn, resolutionBtn];
 
         function updateTheme() {
-            if(!localStorage.getItem('theme')) {
+            if (!localStorage.getItem('theme')) {
                 localStorage.setItem('theme', 'light');
             }
             var theme = localStorage.getItem('theme') || 'light';
-            if(theme === 'dark') {
+            if (theme === 'dark') {
                 document.body.classList.add('dark')
                 themeBtn.innerHTML = '<i class="fa-solid fa-sun-bright"></i>';
             } else {
@@ -509,7 +712,7 @@
         }
         function toggleTheme() {
             var theme = localStorage.getItem('theme') || 'light';
-            if(theme === 'dark') {
+            if (theme === 'dark') {
                 localStorage.setItem('theme', 'light');
             } else {
                 localStorage.setItem('theme', 'dark');
@@ -617,7 +820,7 @@
         });
 
         socket.on('browser-error', data => {
-            if((typeof data === 'string' && data.includes('No active browser')) || (data.error.killSession)) {
+            if ((typeof data === 'string' && data.includes('No active browser')) || (data.error.killSession)) {
                 browserStarted = false;
                 statusEl.innerHTML = `<span class="error">Browser session closed, please restart</span>`;
                 startBtn.querySelector('span').textContent = 'Start';
@@ -645,7 +848,7 @@
       `;
 
             renderStartTime = performance.now();
-            
+
             // Set fixed viewport dimensions to 1280x720
             viewportSize = { width: 1280, height: 720 };
 
@@ -702,17 +905,17 @@
             // Calculate position relative to the image
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            
+
             // Scale to actual browser viewport
             const scaledX = Math.round((x / rect.width) * viewportSize.width);
             const scaledY = Math.round((y / rect.height) * viewportSize.height);
-            
+
             renderStartTime = performance.now();
-            socket.emit('click', { 
-                x: scaledX, 
-                y: scaledY 
+            socket.emit('click', {
+                x: scaledX,
+                y: scaledY
             });
-            
+
             statusEl.textContent = `Clicked at (${scaledX}, ${scaledY})`;
         }
 
@@ -721,16 +924,16 @@
             if (!browserStarted) return;
             const img = browserScreen.querySelector('img');
             if (!img) return;
-            
+
             const rect = img.getBoundingClientRect();
             // Calculate position relative to the image
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            
+
             // Scale to actual browser viewport
             const scaledX = Math.round((x / rect.width) * viewportSize.width);
             const scaledY = Math.round((y / rect.height) * viewportSize.height);
-            
+
             clearTimeout(mouseMoveTimeout);
             mouseMoveTimeout = setTimeout(() => {
                 socket.emit('mouse-move', { x: scaledX, y: scaledY });
